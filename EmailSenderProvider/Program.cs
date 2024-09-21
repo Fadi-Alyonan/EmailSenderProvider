@@ -1,3 +1,4 @@
+using Azure.Messaging.ServiceBus;
 using EmailSenderProvider.Services;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,7 +10,12 @@ var host = new HostBuilder()
     {
         services.AddApplicationInsightsTelemetryWorkerService();
         services.ConfigureFunctionsApplicationInsights();
-        services.AddScoped<EmailServices>();
+        services.AddSingleton<EmailServices>();
+        services.AddSingleton(sp =>
+        {
+            var serviceBusConnectionString = Environment.GetEnvironmentVariable("ServiceBusConnection");
+            return new ServiceBusClient(serviceBusConnectionString);
+        });
 
     })
     .Build();
